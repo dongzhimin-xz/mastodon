@@ -214,6 +214,7 @@ el:
         enable_user: Ενεργοποίηση Χρήστη
         memorialize_account: Μετατροπή Λογαριασμού σε Εις Μνήμην
         promote_user: Προαγωγή Χρήστη
+        publish_terms_of_service: Δημοσίευση Όρων Χρήσης
         reject_appeal: Απόρριψη Έφεσης
         reject_user: Απόρριψη Χρήστη
         remove_avatar_user: Αφαίρεση Άβαταρ
@@ -278,6 +279,7 @@ el:
         enable_user_html: Ο/Η %{name} ενεργοποίησε τη σύνδεση για τον χρήστη %{target}
         memorialize_account_html: O/H %{name} μετέτρεψε τον λογαριασμό του %{target} σε σελίδα εις μνήμην
         promote_user_html: Ο/Η %{name} προβίβασε το χρήστη %{target}
+        publish_terms_of_service_html: Ο χρήστης %{name} δημοσίευσε ενημερώσεις για τους όρους της υπηρεσίας
         reject_appeal_html: Ο/Η %{name} απέρριψε την ένσταση της απόφασης των συντονιστών από %{target}
         reject_user_html: ο/η %{name} απέρριψε την εγγραφή από %{target}
         remove_avatar_user_html: ο/η %{name} αφαίρεσε το άβαταρ του/της %{target}
@@ -925,6 +927,18 @@ el:
       search: Αναζήτηση
       title: Ετικέτες
       updated_msg: Οι ρυθμίσεις των ετικετών ενημερώθηκαν επιτυχώς
+    terms_of_service:
+      back: Πίσω στους όρους παροχής υπηρεσιών
+      changelog: Τι άλλαξε
+      create: Χρησιμοποιήστε τους δικούς σου
+      current: Τρέχουσα
+      draft: Πρόχειρο
+      generate: Χρήση προτύπου
+      generates:
+        action: Δημιουργία
+      history: Ιστορικό
+      publish: Δημοσίευση
+      published_on_html: Δημοσιεύτηκε στις %{date}
     title: Διαχείριση
     trends:
       allow: Επιτρέπεται

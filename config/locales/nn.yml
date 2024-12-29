@@ -214,6 +214,7 @@ nn:
         enable_user: Skruv på brukar
         memorialize_account: Opprett minnekonto
         promote_user: Forfrem brukar
+        publish_terms_of_service: Legg ut bruksvilkåra
         reject_appeal: Avvis appell
         reject_user: Avvis brukar
         remove_avatar_user: Fjern avatar
@@ -278,6 +279,7 @@ nn:
         enable_user_html: "%{name} aktiverte innlogging for brukaren %{target}"
         memorialize_account_html: "%{name} endret %{target}s konto til en minneside"
         promote_user_html: "%{name} fremja brukaren %{target}"
+        publish_terms_of_service_html: "%{name} endra bruksvilkåra"
         reject_appeal_html: "%{name} avviste klagen frå %{target} på modereringa"
         reject_user_html: "%{name} avslo registrering fra %{target}"
         remove_avatar_user_html: "%{name} fjerna %{target} sitt profilbilete"
@@ -925,6 +927,21 @@ nn:
       search: Søk
       title: Emneknaggar
       updated_msg: Emneknagginnstillingane er oppdaterte
+    terms_of_service:
+      back: Tilbake til bruksvilkåra
+      changelog: Kva er endra
+      create: Bruk dine eigne
+      current: Gjeldande
+      draft: Utkast
+      generate: Bruk mal
+      generates:
+        action: Generer
+        chance_to_review_html: "<strong>Dei genererte bruksvilkåra blir ikkje lagde ut automatisk</strong> Du får høve til å sjå gjennom resultatet og fylla inn dei detaljane som trengst."
+        explanation_html: Malen for bruksvilkår er berre til informasjon, og du bør ikkje gå ut frå han som juridiske råd. Viss du har spørsmål om lovverk, bør du spørja ein advokat.
+        title: Oppsett for bruksvilkår
+      history: Historikk
+      live: Direkte
+      no_history: Det er ikkje registrert nokon endringar i bruksvilkåra enno.
     title: Leiing
     trends:
       allow: Tillat
