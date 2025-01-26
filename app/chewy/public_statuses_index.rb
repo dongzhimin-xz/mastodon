@@ -35,7 +35,7 @@ class PublicStatusesIndex < Chewy::Index
       },
 
       content: {
-        tokenizer: 'ik_max_word',
+        tokenizer: 'ik_smart',
         filter: %w(
           lowercase
           asciifolding
