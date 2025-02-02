@@ -33,6 +33,9 @@ import { useAppSelector, useAppDispatch } from 'mastodon/store';
 import { Upload } from './upload';
 import { UploadProgress } from './upload_progress';
 
+const colCount = (size: number) => Math.max(Math.ceil(Math.sqrt(size)), 2);
+const rowCount = (size: number) => Math.ceil(size / colCount(size));
+
 const messages = defineMessages({
   screenReaderInstructions: {
     id: 'upload_form.drag_and_drop.instructions',
@@ -140,6 +143,15 @@ export const UploadForm: React.FC = () => {
     [intl],
   );
 
+  const style = {
+    gridTemplateColumns: '1fr',
+    gridTemplateRows: '1fr',
+  };
+  const cols = colCount(mediaIds.size);
+  const rows = rowCount(mediaIds.size);
+  style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
   return (
     <>
       <UploadProgress
@@ -151,6 +163,7 @@ export const UploadForm: React.FC = () => {
       {mediaIds.size > 0 && (
         <div
           className={`compose-form__uploads media-gallery media-gallery--layout-${mediaIds.size}`}
+          style={style}
         >
           <DndContext
             sensors={sensors}
