@@ -31,7 +31,11 @@ const mapStateToProps = state => ({
   missingAltText: state.getIn(['compose', 'media_attachments']).some(media => ['image', 'gifv'].includes(media.get('type')) && (media.get('description') ?? '').length === 0),
   isInReply: state.getIn(['compose', 'in_reply_to']) !== null,
   lang: state.getIn(['compose', 'language']),
-  maxChars: state.getIn(['server', 'server', 'configuration', 'statuses', 'max_characters'], 500),
+  maxChars: state.getIn(['server', 'server', 'configuration', 'statuses', 'max_characters'], 5000),
+  is_scheduled: state.getIn(['compose', 'is_scheduled']),
+  schedule_time: state.getIn(['compose', 'schedule_time']),
+  schedule_timezone: state.getIn(['compose', 'schedule_timezone']),
+  scheduled_at: state.getIn(['compose', 'scheduled_at']),
 });
 
 const mapDispatchToProps = (dispatch) => ({

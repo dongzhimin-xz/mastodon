@@ -45,6 +45,8 @@ import {
   COMPOSE_CHANGE_MEDIA_ORDER,
   COMPOSE_SET_STATUS,
   COMPOSE_FOCUS,
+  COMPOSE_CHANGE_IS_SCHEDULED,
+  COMPOSE_CHANGE_SCHEDULE_TIME
 } from '../actions/compose';
 import { REDRAFT } from '../actions/statuses';
 import { STORE_HYDRATE } from '../actions/store';
@@ -83,6 +85,10 @@ const initialState = ImmutableMap({
   resetFileKey: Math.floor((Math.random() * 0x10000)),
   idempotencyKey: null,
   tagHistory: ImmutableList(),
+  schedule_time: null,
+  schedule_timezone: '+08:00',
+  is_scheduled: false,
+  scheduled_at: null,
 });
 
 const initialPoll = ImmutableMap({
@@ -117,6 +123,9 @@ function clearAll(state) {
     map.set('progress', 0);
     map.set('poll', null);
     map.set('idempotencyKey', uuid());
+    map.set('schedule_time', null);
+    map.set('is_scheduled', false);
+    map.set('scheduled_at', null);
   });
 }
 
@@ -557,7 +566,19 @@ export const composeReducer = (state = initialState, action) => {
 
       return list.splice(indexA, 1).splice(indexB, 0, moveItem);
     });
+  case COMPOSE_CHANGE_IS_SCHEDULED:
+    return state.withMutations(map => {
+      map.set('is_scheduled', !state.get('is_scheduled'));
+      map.set('scheduled_at', state.get('schedule_time') + ':00.0' + state.get('schedule_timezone'));
+      map.set('idempotencyKey', uuid());      
+    });
+  case COMPOSE_CHANGE_SCHEDULE_TIME:
+    return state.withMutations(map => {
+      map.set('schedule_time', action.value);
+      map.set('scheduled_at', action.value + ':00.0' + state.get('schedule_timezone'));
+      map.set('idempotencyKey', uuid());
+    });
   default:
     return state;
   }
-};
+}
