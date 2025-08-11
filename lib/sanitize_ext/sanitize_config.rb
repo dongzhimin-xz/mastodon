@@ -187,7 +187,6 @@ class Sanitize
       add_attributes: {},
 
       transformers: [
-        CLASS_WHITELIST_TRANSFORMER,
         UNSUPPORTED_HREF_TRANSFORMER,
         LINK_REL_TRANSFORMER,
         LINK_TARGET_TRANSFORMER,
