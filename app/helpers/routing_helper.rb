@@ -24,7 +24,7 @@ module RoutingHelper
     case Paperclip::Attachment.default_options[:storage]
     when :s3, :azure
       url = attachment.expiring_url(expires_in.to_i)
-      url.sub(ENV.fetch('S3_ENDPOINT') + "/" + ENV.fetch('S3_BUCKET'), "https://" + ENV.fetch('S3_ALIAS_HOST'))
+      ENV.key?('S3_ALIAS_HOST')? url.sub(ENV.fetch('S3_ENDPOINT') + "/" + ENV.fetch('S3_BUCKET'), "https://" + ENV.fetch('S3_ALIAS_HOST')) : url
     when :fog
       if Paperclip::Attachment.default_options.dig(:fog_credentials, :openstack_temp_url_key).present?
         attachment.expiring_url(expires_in.from_now)
