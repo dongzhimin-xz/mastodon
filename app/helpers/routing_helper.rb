@@ -23,7 +23,8 @@ module RoutingHelper
   def expiring_asset_url(attachment, expires_in)
     case Paperclip::Attachment.default_options[:storage]
     when :s3, :azure
-      URI.parse(attachment).host.replace(ENV.fetch('S3_ALIAS_HOST'))
+      url = attachment.expiring_url(expires_in.to_i)
+      url.sub(ENV.fetch('S3_ENDPOINT') + "/" + ENV.fetch('S3_BUCKET'), "https://" + ENV.fetch('S3_ALIAS_HOST'))
     when :fog
       if Paperclip::Attachment.default_options.dig(:fog_credentials, :openstack_temp_url_key).present?
         attachment.expiring_url(expires_in.from_now)
