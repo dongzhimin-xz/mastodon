@@ -6,14 +6,6 @@ class AdvancedTextFormatter < TextFormatter
       super(options)
       @format_link = block
     end
-=begin
-    def block_code(code, _language)
-      <<~HTML
-        <pre><code>#{ERB::Util.h(code).gsub("\n", '<br/>')}</code></pre>
-      HTML
-      CodeRay.scan(code, _language).div(:tab_width=>2)
-    end
-=end
     include Rouge::Plugins::Redcarpet
 
     def autolink(link, link_type)
