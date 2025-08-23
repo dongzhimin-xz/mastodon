@@ -32,6 +32,7 @@ class Sanitize
         next true if /^(mention|hashtag)$/.match?(e) # semantic classes
         next true if /^(ellipsis|invisible)$/.match?(e) # link formatting classes
         next true if e == 'quote-inline'
+        next true if /(ge|gs|o|ow|c|cm|cp|c1|cs|n|py|nl|ni|nb|bp|nf|na|nx|nc|nn|no|ne|nd|nt|kn|k|kc|kd|kp|kr|kt|nv|vg|vc|vi|m|il|mf|mh|mi|mo|s|sr|s2|sb|sh|sx|s1|ss|se|si|sc|sd|l|ld|p|w|err|gp|gi|gd|gh|gu|hll|lineno|highlight)/.match?(e) # ruby-rouge classes
       end
 
       node['class'] = class_list.join(' ')
@@ -184,9 +185,15 @@ class Sanitize
         'a' => %w(href rel class title target)
       ),
 
-      add_attributes: {},
+      add_attributes: {
+        'pre' => {
+          'class' => 'highlight'
+        }
+      },
 
       transformers: [
+        ALLOWED_CLASS_TRANSFORMER,
+        TRANSLATE_TRANSFORMER,
         UNSUPPORTED_HREF_TRANSFORMER,
         LINK_REL_TRANSFORMER,
         LINK_TARGET_TRANSFORMER,
