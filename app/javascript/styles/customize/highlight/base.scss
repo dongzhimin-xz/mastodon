@@ -16,9 +16,9 @@ pre.highlight {
   overflow-x: auto;
   //margin-bottom: 20px;
   padding: 8px;
+  background-color: $highlight-background;
 
   >code {
-    background-color: $highlight-background;
     padding: 0px;
   }
 }
