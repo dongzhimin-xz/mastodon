@@ -6,7 +6,32 @@ class AdvancedTextFormatter < TextFormatter
       super(options)
       @format_link = block
     end
-    include Rouge::Plugins::Redcarpet
+    include Rouge
+    
+    def block_code(code, language)
+      lexer =
+        begin
+          Lexer.find_fancy(language, code)
+        rescue Guesser::Ambiguous => e
+          e.alternatives.first
+        end
+      lexer ||= Lexers::PlainText
+
+      # XXX HACK: Redcarpet strips hard tabs out of code blocks,
+      # so we assume you're not using leading spaces that aren't tabs,
+      # and just replace them here.
+      if lexer.tag == 'make'
+        code.gsub! %r/^    /, "\t"
+      end
+
+      formatter = rouge_formatter(lexer)
+      formatter.format(lexer.lex(code)).gsub!("\n", '<br/>')
+    end
+
+    # override this method for custom formatting behavior
+    def rouge_formatter(lexer)
+      Formatters::HTMLLegacy.new(:css_class => "highlight #{lexer.tag}")
+    end
 
     def autolink(link, link_type)
       return link if link_type == :email
@@ -94,7 +119,7 @@ class AdvancedTextFormatter < TextFormatter
 
   def format_markdown(html)
     html = markdown_formatter.render(html)
-#    html.delete("\r").delete("\n")
+    html.delete("\r").delete("\n")
   end
 
   def markdown_formatter
