@@ -130,7 +130,7 @@ export const quoteComposeByStatus = createAppThunk(
 
     if (composeState.get('id')) {
       dispatch(showAlert({ message: messages.quoteErrorEdit }));
-    } else if (composeState.get('poll')) {
+{/*    } else if (composeState.get('poll')) {
       dispatch(showAlert({ message: messages.quoteErrorPoll }));
     } else if (
       composeState.get('is_uploading') ||
@@ -148,6 +148,7 @@ export const quoteComposeByStatus = createAppThunk(
       status.getIn(['quote_approval', 'current_user']) !== 'manual'
     ) {
       dispatch(showAlert({ message: messages.quoteErrorUnauthorized }));
+*/}
     } else if (
       status.get('visibility') === 'unlisted' &&
       !wasQuietPostHintModalDismissed

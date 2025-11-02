@@ -145,6 +145,8 @@ export function quoteItemState({
     iconComponent: FormatQuote,
   };
 
+{/*
+
   if (!isPublic && !isMine) {
     iconText.disabled = true;
     iconText.iconComponent = FormatQuoteOff;
@@ -162,6 +164,8 @@ export function quoteItemState({
       ? messages.quote_followers_only
       : messages.quote_cannot;
   }
+
+*/}
 
   return iconText;
 }
