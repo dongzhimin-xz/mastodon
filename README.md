@@ -1,3 +1,9 @@
+## This fork of mastodon can upgrade from official forks without migrate database. Deployment refer to [Official Document](https://docs.joinmastodon.org/admin/install/). If you upgrade from the [official branch](https://github.com/mastodon/mastodon) or the [tag without this information](https://github.com/dongzhimin-xz/mastodon/releases/tag/custom-nezha2) and ealier version, please run `bundle install` before running `RAILS_ENV=production bundle exec rails assets:precompile`
+
+### 本长毛象分支从官方修改而来，迁移往本分支，或迁移回[官方分支v4.4](https://github.com/mastodon/mastodon/tree/stable-4.4)无需迁移数据库，但是*必要*运行一次`bundle install`再进行预编译和重启实例服务。
+
+# 任何疑问请阅读官方文档↓↓
+
 > [!NOTE]
 > Want to learn more about Mastodon?
 > Click below to find out more in a video.
