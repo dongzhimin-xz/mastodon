@@ -53,6 +53,8 @@ require_relative '../lib/active_record/batches'
 require_relative '../lib/simple_navigation/item_extensions'
 require_relative '../lib/vite_ruby/sri_extensions'
 
+require 'rouge/plugins/redcarpet'   # 使用rouge高亮代码块
+
 Bundler.require(:pam_authentication) if ENV['PAM_ENABLED'] == 'true'
 
 module Mastodon
