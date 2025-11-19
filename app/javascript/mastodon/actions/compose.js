@@ -207,7 +207,6 @@ export function submitCompose(successCallback) {
         message: messages.blankPostError,
       }));
       dispatch(focusCompose());
-    const is_scheduled = getState().getIn(['compose', 'is_scheduled']);
 
       return;
     }
@@ -235,6 +234,7 @@ export function submitCompose(successCallback) {
     }
 
     const visibility = getState().getIn(['compose', 'privacy']);
+    const is_scheduled = getState().getIn(['compose', 'is_scheduled']);
     api().request({
       url: statusId === null ? '/api/v1/statuses' : `/api/v1/statuses/${statusId}`,
       method: statusId === null ? 'post' : 'put',
