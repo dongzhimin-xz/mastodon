@@ -5,11 +5,9 @@ import PollButton from '../components/poll_button';
 
 const mapStateToProps = state => {
   const readyAttachmentsSize = state.compose.get('media_attachments').size ?? 0;
-  const hasAttachments = readyAttachmentsSize > 0 || !!state.compose.get('is_uploading');
-  const hasQuote = !!state.compose.get('quoted_status_id');
 
   return ({
-    disabled: hasAttachments || hasQuote,
+    disabled: state.getIn(['compose', 'is_uploading']),
     active: state.getIn(['compose', 'poll']) !== null,
   });
 };

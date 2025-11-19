@@ -145,23 +145,5 @@ export function quoteItemState({
     iconComponent: FormatQuote,
   };
 
-  if (!isPublic && !isMine) {
-    iconText.disabled = true;
-    iconText.iconComponent = FormatQuoteOff;
-    iconText.meta = messages.quote_private;
-  } else if (isQuoteAutomaticallyAccepted) {
-    iconText.title = messages.quote;
-  } else if (isQuoteManuallyAccepted) {
-    iconText.title = messages.request_quote;
-    iconText.meta = messages.quote_manual_review;
-    // We don't show the disabled state when logged out
-  } else if (isLoggedIn) {
-    iconText.disabled = true;
-    iconText.iconComponent = FormatQuoteOff;
-    iconText.meta = isQuoteFollowersOnly
-      ? messages.quote_followers_only
-      : messages.quote_cannot;
-  }
-
   return iconText;
 }
