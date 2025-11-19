@@ -170,24 +170,10 @@ export const quoteComposeByStatus = createAppThunk(
       dispatch(showAlert({ message: messages.quoteErrorEdit }));
     } else if (composeState.get('privacy') === 'direct') {
       dispatch(showAlert({ message: messages.quoteErrorPrivateMention }));
-    } else if (composeState.get('poll')) {
-      dispatch(showAlert({ message: messages.quoteErrorPoll }));
     } else if (
-      composeState.get('is_uploading') ||
-      (mediaAttachments &&
-        typeof mediaAttachments !== 'string' &&
-        typeof mediaAttachments !== 'number' &&
-        typeof mediaAttachments !== 'boolean' &&
-        mediaAttachments.size !== 0)
+      composeState.get('is_uploading')
     ) {
       dispatch(showAlert({ message: messages.quoteErrorUpload }));
-    } else if (composeState.get('quoted_status_id')) {
-      dispatch(showAlert({ message: messages.quoteErrorQuote }));
-    } else if (
-      status.getIn(['quote_approval', 'current_user']) !== 'automatic' &&
-      status.getIn(['quote_approval', 'current_user']) !== 'manual'
-    ) {
-      dispatch(showAlert({ message: messages.quoteErrorUnauthorized }));
     } else if (
       status.get('visibility') === 'unlisted' &&
       !wasQuietPostHintModalDismissed
