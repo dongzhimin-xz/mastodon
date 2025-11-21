@@ -51,7 +51,7 @@ class Quote < ApplicationRecord
 
   def reject!
     if accepted?
-      update!(state: :revoked)
+#      update!(state: :revoked)
     elsif !revoked?
       update!(state: :rejected)
     end
