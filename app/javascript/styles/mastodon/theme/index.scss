@@ -40,6 +40,11 @@ html:where([data-user-theme='default']) {
 html[data-user-theme='contrast'],
 html[data-user-theme='contrast'] .theme-dark {
   @include dark.contrast-overrides;
+
+  color-scheme: dark;
+
+  @include dark.tokens;
+  @include utils.invert-on-dark;
 }
 
 .theme-light,
