@@ -32,6 +32,9 @@ import { Warning } from './warning';
 import { ComposeQuotedStatus } from './quoted_post';
 import { VisibilityButton } from './visibility_button';
 
+import ScheduleButtonContainer from '../containers/schedule_button_container';
+import { ScheduleForm } from './schedule_form';
+
 const allowedAroundShortCode = '><\u0085\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\u2028\u2029\u0009\u000a\u000b\u000c\u000d';
 
 const messages = defineMessages({
@@ -75,6 +78,11 @@ class ComposeForm extends ImmutablePureComponent {
     lang: PropTypes.string,
     maxChars: PropTypes.number,
     redirectOnSuccess: PropTypes.bool,
+
+    schedule_time: PropTypes.string,
+    schedule_timezone: PropTypes.string,
+    is_scheduled: PropTypes.bool.isRequired,
+    scheduled_at: PropTypes.string,
   };
 
   static defaultProps = {
@@ -323,6 +331,7 @@ class ComposeForm extends ImmutablePureComponent {
                 <PollButtonContainer />
                 <SpoilerButtonContainer />
                 <EmojiPickerDropdown onPickEmoji={this.handleEmojiPick} />
+                <ScheduleButtonContainer />
                 <CharacterCounter max={maxChars} text={this.getFulltextForCharacterCounting()} />
               </div>
 
@@ -341,6 +350,7 @@ class ComposeForm extends ImmutablePureComponent {
                 </Button>
               </div>
             </div>
+            <ScheduleForm />
           </div>
         </div>
       </form>

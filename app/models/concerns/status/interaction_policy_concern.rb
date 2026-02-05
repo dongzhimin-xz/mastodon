@@ -57,7 +57,7 @@ module Status::InteractionPolicyConcern
 
     return :unknown if [automatic_policy, manual_policy].any?(&:unsupported_policy?)
 
-    :denied
+    :automatic
   end
 
   def downgrade_quote_policy

@@ -81,10 +81,11 @@ export const COMPOSE_CHANGE_MEDIA_ORDER       = 'COMPOSE_CHANGE_MEDIA_ORDER';
 export const COMPOSE_SET_STATUS = 'COMPOSE_SET_STATUS';
 export const COMPOSE_FOCUS = 'COMPOSE_FOCUS';
 
+export const COMPOSE_CHANGE_IS_SCHEDULED = 'COMPOSE_CHANGE_IS_SCHEDULED';
+export const COMPOSE_CHANGE_SCHEDULE_TIME = 'COMPOSE_CHANGE_SCHEDULE_TIME';
+
 const messages = defineMessages({
   uploadErrorLimit: { id: 'upload_error.limit', defaultMessage: 'File upload limit exceeded.' },
-  uploadErrorPoll:  { id: 'upload_error.poll', defaultMessage: 'File upload not allowed with polls.' },
-  uploadQuote: { id: 'upload_error.quote', defaultMessage: 'File upload not allowed with quotes.' },
   open: { id: 'compose.published.open', defaultMessage: 'Open' },
   published: { id: 'compose.published.body', defaultMessage: 'Post published.' },
   saved: { id: 'compose.saved.body', defaultMessage: 'Post saved.' },
@@ -233,6 +234,7 @@ export function submitCompose(successCallback) {
     }
 
     const visibility = getState().getIn(['compose', 'privacy']);
+    const is_scheduled = getState().getIn(['compose', 'is_scheduled']);
     api().request({
       url: statusId === null ? '/api/v1/statuses' : `/api/v1/statuses/${statusId}`,
       method: statusId === null ? 'post' : 'put',
@@ -248,6 +250,7 @@ export function submitCompose(successCallback) {
         language: getState().getIn(['compose', 'language']),
         quoted_status_id: getState().getIn(['compose', 'quoted_status_id']),
         quote_approval_policy: visibility === 'private' || visibility === 'direct' ? 'nobody' : getState().getIn(['compose', 'quote_policy']),
+        scheduled_at: is_scheduled ? getState().getIn(['compose', 'scheduled_at']) : null,
       },
       headers: {
         'Idempotency-Key': getState().getIn(['compose', 'idempotencyKey']),
@@ -257,11 +260,24 @@ export function submitCompose(successCallback) {
         browserHistory.goBack();
       }
 
+      
+      if ('scheduled_at' in response.data) {
+        dispatch(showAlert({
+          message: messages.saved,
+          dismissAfter: 10000,
+        }));
+        dispatch(submitComposeSuccess({ ...response.data.params}));
+        return;
+      }
+      
       dispatch(insertIntoTagHistory(response.data.tags, status));
       dispatch(submitComposeSuccess({ ...response.data }));
       if (typeof successCallback === 'function') {
         successCallback(response.data);
       }
+
+      
+      
 
       // To make the app more responsive, immediately push the status
       // into the columns
@@ -321,11 +337,6 @@ export function submitComposeFail(error) {
 
 export function uploadCompose(files) {
   return function (dispatch, getState) {
-    // Exit if there's a quote.
-    if (getState().compose.get('quoted_status_id')) {
-      dispatch(showAlert({ message: messages.uploadQuote }));
-      return;
-    }
     const uploadLimit = getState().getIn(['server', 'server', 'configuration', 'statuses', 'max_media_attachments']);
     const media = getState().getIn(['compose', 'media_attachments']);
     const pending = getState().getIn(['compose', 'pending_media_attachments']);
@@ -335,11 +346,6 @@ export function uploadCompose(files) {
 
     if (files.length + media.size + pending > uploadLimit) {
       dispatch(showAlert({ message: messages.uploadErrorLimit }));
-      return;
-    }
-
-    if (getState().getIn(['compose', 'poll'])) {
-      dispatch(showAlert({ message: messages.uploadErrorPoll }));
       return;
     }
 
@@ -866,3 +872,16 @@ export const changeMediaOrder = (a, b) => ({
   a,
   b,
 });
+
+export function changeIsScheduled() {
+  return {
+    type: COMPOSE_CHANGE_IS_SCHEDULED,
+  };
+}
+
+export function changeScheduleTime(value) {
+  return {
+    type: COMPOSE_CHANGE_SCHEDULE_TIME,
+    value,
+  };
+}

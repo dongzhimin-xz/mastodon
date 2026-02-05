@@ -1,3 +1,38 @@
+## 此分支为本站魔改分支，欢迎各位站长参考使用
+本长毛象实例的网址可能因故变动，目前（2025.11.22）截止笔者编写此文档时，为 https://cmx.xuzhou-jiang.su
+本站魔改历程和心得记录于 https://blog.xuzhou-jiang.su
+### 本代码使用方法
+
+#### 新建实例
+1. 参考[官方文档](https://docs.joinmastodon.org)，您需要自行准备：**域名**（必需）、smtp服务器、存储桶、**运行本代码的服务器**（必需）。
+2. 参考[官方文档](https://docs.joinmastodon.org/admin/install/)，安装Ubuntu系统（可以正常运行ruby和其他依赖的Linux系统也可），配置防火墙。依据官方文档安装依赖软件，创建用户`mastodon`。
+3. 执行`git clone https://github.com/dongzhimin-xz/mastodon.git live && cd live`，克隆本代码而非官方稳定版代码。`checkout`到你想要的提交版本，一般本分支`HEAD`也可使用。（由于本站代码开源，且不盈利，恕不提供技术支持）
+4. 执行[官方文档](https://docs.joinmastodon.org/admin/install/)剩余步骤，安装相应版本的ruby、Gem包和模块，完成实例初始化。
+5. 获取并安装网站证书
+
+#### 从官方实例迁移而来
+1. 登录运行实例的机器，通过fork或添加远程分支等方法，`git fetch`本代码，并检出到相应版本
+2. 假设你完全按照[官方文档](https://docs.joinmastodon.org/admin/install/)安装了官方实例，在`mastodon`用户下执行如下命令拉取ruby最新代码
+```bash
+git -C "$(rbenv root)"/plugins/ruby-build pull
+```
+3. 升级ruby，以`mastodon`身份在长毛象目录下执行 `RUBY_CONFIGURE_OPTS=--with-jemalloc rbenv install`
+4. 安装依赖包`bundle install`和`yarn install --immutable`
+5. 预编译资产`RAILS_ENV=production bundle exec rails assets:precompile`
+6. 停止长毛象进程，以`root`身份执行`systemctl stop mastodon-*`
+7. 迁移数据库，以`mastodon`身份，回到`/home/mastodon/live`，执行`RAILS_ENV=production bundle exec rails db:migrate`
+8. 成功后，启动长毛象进程`systemctl start mastodon-*`
+
+#### 迁移回官方实例
+操作类似以上描述
+
+#### 迁移往glitch分支或其他分支
+截止目前（2025.11.22以前的提交），未魔改数据库。可以参考相应长毛象版本的文档进行迁移。
+
+未来可能会轻微改动数据库，还望谨慎迁移。
+
+# 任何疑问请阅读官方文档↓↓
+
 > [!NOTE]
 > Want to learn more about Mastodon?
 > Click below to find out more in a video.
