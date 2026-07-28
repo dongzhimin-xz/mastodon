@@ -1057,6 +1057,7 @@ DEPENDENCIES
   rdf-normalize (~> 0.5)
   redcarpet (~> 3.6)
   redis (~> 5)
+  rouge
   rqrcode (~> 3.0)
   rspec-github (~> 3.0)
   rspec-rails (~> 8.0)
