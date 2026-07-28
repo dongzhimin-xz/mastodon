@@ -32,6 +32,12 @@ export const selectTimelineByParams = createAppSelector(
   (key, timelines) => toTypedTimeline(timelines.get(key)),
 );
 
+export const selectTimelinesByAccount = createAppSelector(
+  [(state) => state.timelines, (_, accountId: string) => accountId],
+  (timelines, accountId) =>
+    timelines.filter((_, key) => key.startsWith(`account:${accountId}:`)),
+);
+
 export function toTypedTimeline(timeline?: ImmutableMap<string, unknown>) {
   if (!timeline) {
     return null;
@@ -47,5 +53,5 @@ export function toTypedTimeline(timeline?: ImmutableMap<string, unknown>) {
       emptyList,
     ) as ImmutableList<string>,
     items: timeline.get('items', emptyList) as ImmutableList<string>,
-  } as TimelineShape;
+  } satisfies TimelineShape;
 }

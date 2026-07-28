@@ -15,6 +15,7 @@
 #  avatar_remote_url             :string
 #  avatar_storage_schema_version :integer
 #  avatar_updated_at             :datetime
+#  collections_url               :string
 #  discoverable                  :boolean
 #  display_name                  :string           default(""), not null
 #  domain                        :string
@@ -46,6 +47,9 @@
 #  reviewed_at                   :datetime
 #  sensitized_at                 :datetime
 #  shared_inbox_url              :string           default(""), not null
+#  show_featured                 :boolean          default(TRUE), not null
+#  show_media                    :boolean          default(TRUE), not null
+#  show_media_replies            :boolean          default(TRUE), not null
 #  silenced_at                   :datetime
 #  suspended_at                  :datetime
 #  suspension_origin             :integer
@@ -59,15 +63,7 @@
 #
 
 class Account < ApplicationRecord
-  self.ignored_columns += %w(
-    devices_url
-    hub_url
-    remote_url
-    salmon_url
-    secret
-    subscription_expires_at
-    trust_level
-  )
+  self.ignored_columns += %w(devices_url)
 
   BACKGROUND_REFRESH_INTERVAL = 1.week.freeze
   REFRESH_DEADLINE = 6.hours
@@ -80,7 +76,7 @@ class Account < ApplicationRecord
   URL_PREFIX_RE = %r{\Ahttp(s?)://[^/]+}
   USERNAME_ONLY_RE = /\A#{USERNAME_RE}\z/i
   USERNAME_LENGTH_LIMIT = 30
-  DISPLAY_NAME_LENGTH_LIMIT = 30
+  DISPLAY_NAME_LENGTH_LIMIT = 40
   NOTE_LENGTH_LIMIT = 500
 
   # Hard limits for federated content
@@ -189,8 +185,10 @@ class Account < ApplicationRecord
            :role,
            :locale,
            :shows_application?,
+           :email_subscriptions_enabled?,
            :prefers_noindex?,
            :time_zone,
+           :can?,
            to: :user,
            prefix: true,
            allow_nil: true
@@ -259,8 +257,26 @@ class Account < ApplicationRecord
     last_webfingered_at.nil? || last_webfingered_at <= STALE_THRESHOLD.ago
   end
 
+  def needs_background_refresh?
+    return false if local?
+
+    return true if last_webfingered_at.blank? || last_webfingered_at <= BACKGROUND_REFRESH_INTERVAL.ago
+
+    # TODO: Remove some time after 4.6
+    # This is temporary workaround to speed up account refreshs after
+    # collections have been enabled / deployed.
+    # Accounts will be refreshed when they lack a feature_approval_policy
+    # but we know from other account's on the same server that they should
+    # have.
+    return false unless feature_approval_policy.zero?
+
+    Rails.cache.fetch("feature_approval_policy_availability:#{domain}", expires_in: 30.minutes) do
+      Account.where(domain:).where.not(feature_approval_policy: 0).exists?
+    end
+  end
+
   def schedule_refresh_if_stale!
-    return unless last_webfingered_at.present? && last_webfingered_at <= BACKGROUND_REFRESH_INTERVAL.ago
+    return unless needs_background_refresh?
 
     AccountRefreshWorker.perform_in(rand(REFRESH_DEADLINE), id)
   end
@@ -285,8 +301,22 @@ class Account < ApplicationRecord
     strikes.where(overruled_at: nil).count
   end
 
-  def keypair
-    @keypair ||= OpenSSL::PKey::RSA.new(private_key || public_key)
+  def keypair(type: nil)
+    # Pick the first (oldest) keypair matching the expected type,
+    # as we can expect our key rotation code to add stand-by keys with higher IDs
+    # before pruning older keys with lower IDs after some time.
+
+    scope = keypairs.usable.order(id: :asc)
+    scope = scope.where(type: type) if type.present?
+
+    case type
+    when :rsa, nil
+      # The legacy key is always RSA, so only fallback
+      # when no other type is requested
+      scope.first || Keypair.from_legacy_account(self)
+    else
+      scope.first
+    end
   end
 
   def tags_as_strings=(tag_names)
@@ -324,16 +354,16 @@ class Account < ApplicationRecord
     old_fields = self[:fields] || []
     old_fields = [] if old_fields.is_a?(Hash)
 
-    if attributes.is_a?(Hash)
-      attributes.each_value do |attr|
-        next if attr[:name].blank? && attr[:value].blank?
+    attributes = attributes.values if attributes.is_a?(Hash)
 
-        previous = old_fields.find { |item| item['value'] == attr[:value] }
+    attributes.each do |attr|
+      next if attr[:name].blank? && attr[:value].blank?
 
-        attr[:verified_at] = previous['verified_at'] if previous && previous['verified_at'].present?
+      previous = old_fields.find { |item| item['value'] == attr[:value] }
 
-        fields << attr
-      end
+      attr[:verified_at] = previous['verified_at'] if previous && previous['verified_at'].present?
+
+      fields << attr
     end
 
     self[:fields] = fields
@@ -460,14 +490,16 @@ class Account < ApplicationRecord
   before_destroy :clean_feed_manager
 
   def ensure_keys!
-    return unless local? && private_key.blank? && public_key.blank?
+    return unless local? && private_key.blank? && public_key.blank? && keypairs.empty?
 
     generate_keys
     save!
   end
 
-  def featureable?
-    local? && discoverable?
+  def featureable_by?(other_account)
+    return discoverable? && (!locked? || followed_by?(other_account) || other_account.id == id) if local?
+
+    feature_policy_for_account(other_account).in?(%i(automatic manual))
   end
 
   private
@@ -478,11 +510,10 @@ class Account < ApplicationRecord
   end
 
   def generate_keys
-    return unless local? && private_key.blank? && public_key.blank?
+    return unless local? && private_key.blank? && public_key.blank? && keypairs.empty?
 
     keypair = OpenSSL::PKey::RSA.new(2048)
-    self.private_key = keypair.to_pem
-    self.public_key  = keypair.public_key.to_pem
+    keypairs << keypairs.build(local_fragment: "#rsa-#{SecureRandom.hex(8)}", type: :rsa, public_key: keypair.public_key.to_pem, private_key: keypair.to_pem)
   end
 
   def normalize_domain
