@@ -258,7 +258,7 @@ export function submitCompose(successCallback) {
         browserHistory.goBack();
       }
 
-      dispatch(insertIntoTagHistory(response.data.tags, statusText));
+//      dispatch(insertIntoTagHistory(response.data.tags, statusText));
       
       if ('scheduled_at' in response.data) {
         dispatch(showAlert({
