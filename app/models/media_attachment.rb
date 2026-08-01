@@ -46,6 +46,9 @@ class MediaAttachment < ApplicationRecord
   IMAGE_LIMIT = 32.megabytes
   VIDEO_LIMIT = 200.megabytes
 
+  REMOTE_IMAGE_LIMIT = 16.megabytes
+  REMOTE_VIDEO_LIMIT = 99.megabytes
+
   MAX_VIDEO_MATRIX_LIMIT = 8_294_400 # 3840x2160px
   MAX_VIDEO_FRAME_RATE   = 120
   MAX_VIDEO_FRAMES       = 136_000 # 可上传约2:30:00的15fps电影
@@ -193,7 +196,7 @@ class MediaAttachment < ApplicationRecord
 
   validates_attachment_content_type :file, content_type: IMAGE_MIME_TYPES + VIDEO_MIME_TYPES + AUDIO_MIME_TYPES
   validates_attachment_size :file, less_than: ->(m) { m.larger_media_format? ? VIDEO_LIMIT : IMAGE_LIMIT }
-  remotable_attachment :file, VIDEO_LIMIT, suppress_errors: false, download_on_assign: false, attribute_name: :remote_url
+  remotable_attachment :file, REMOTE_VIDEO_LIMIT, suppress_errors: false, download_on_assign: false, attribute_name: :remote_url
 
   has_attached_file :thumbnail,
                     styles: THUMBNAIL_STYLES,
@@ -202,7 +205,7 @@ class MediaAttachment < ApplicationRecord
 
   validates_attachment_content_type :thumbnail, content_type: IMAGE_MIME_TYPES
   validates_attachment_size :thumbnail, less_than: IMAGE_LIMIT
-  remotable_attachment :thumbnail, IMAGE_LIMIT, suppress_errors: true, download_on_assign: false
+  remotable_attachment :thumbnail, REMOTE_IMAGE_LIMIT, suppress_errors: true, download_on_assign: false
 
   validates :account, presence: true
   validates :description, length: { maximum: MAX_DESCRIPTION_LENGTH }, if: :local?
