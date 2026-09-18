@@ -114,6 +114,7 @@ export const config: UserConfigFnPromise = async ({ mode, command }) => {
         clientPort: 3036,
       },
       port: 3036,
+      allowedHosts: true,
     },
     build: {
       commonjsOptions: { transformMixedEsModules: true },
