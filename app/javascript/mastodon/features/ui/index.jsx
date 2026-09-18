@@ -21,7 +21,7 @@ import { Hotkeys } from 'mastodon/components/hotkeys';
 import { HoverCardController } from 'mastodon/components/hover_card_controller';
 import { PictureInPicture } from 'mastodon/features/picture_in_picture';
 import { identityContextPropShape, withIdentity } from 'mastodon/identity_context';
-import { layoutFromWindow, transientSingleColumn } from 'mastodon/is_mobile';
+import { layoutFromWindow } from 'mastodon/is_mobile';
 import { WithRouterPropTypes } from 'mastodon/utils/react_router';
 import { isRedesignEnabled } from '@/mastodon/utils/environment';
 import { checkAnnualReport } from '@/mastodon/reducers/slices/annual_report';
@@ -30,7 +30,7 @@ import { uploadCompose, resetCompose, changeComposeSpoilerness } from '../../act
 import { clearHeight } from '../../actions/height_cache';
 import { fetchServer, fetchServerTranslationLanguages } from '../../actions/server';
 import { expandHomeTimeline } from '../../actions/timelines';
-import { initialState, forceSingleColumn, me, owner, singleUserMode, trendsEnabled, landingPage, localLiveFeedAccess, disableHoverCards, domain } from '../../initial_state';
+import { initialState, me, owner, singleUserMode, trendsEnabled, landingPage, localLiveFeedAccess, disableHoverCards, domain } from '../../initial_state';
 
 import BundleColumnError from './components/bundle_column_error';
 import { NavigationBar } from './components/navigation_bar';
@@ -202,8 +202,8 @@ class SwitchingColumnsArea extends PureComponent {
           <WrappedSwitch>
             <Redirect from='/' to={redirectWithoutFocusing(rootRedirect)} exact />
 
-            {(forceSingleColumn || transientSingleColumn) ? <Redirect from='/deck' to={redirectWithoutFocusing('/home')} exact /> : null}
-            {(forceSingleColumn || transientSingleColumn) && pathName.startsWith('/deck/') ? <Redirect from={pathName} to={{...this.props.location, pathname: pathName.slice(5)}} /> : null}
+            {singleColumn ? <Redirect from='/deck' to='/home' exact /> : null}
+            {singleColumn && pathName.startsWith('/deck/') ? <Redirect from={pathName} to={{...this.props.location, pathname: pathName.slice(5)}} /> : null}
             {/* Redirect old bookmarks (without /deck) with home-like routes to the advanced interface */}
             {!singleColumn && pathName === '/home' ? <Redirect from='/home' to={redirectWithoutFocusing(defaultHomepage)} exact /> : null}
             {(pathName === '/getting-started' || isRedesignEnabled())
