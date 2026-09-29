@@ -17,6 +17,7 @@ import {
 
 import { languageName, useLanguageGuess } from './hooks';
 import { selectComposeAttachments } from './selectors';
+import classes from './styles.module.scss';
 
 const selectComposeAttachmentsWithoutAlt = createAppSelector(
   [selectComposeAttachments],
@@ -33,8 +34,12 @@ const selectIsFollowersReply = createAppSelector(
         state,
         state.compose.get('in_reply_to') as null | string,
       ),
+    (state) => state.meta.get('me') as string | null,
   ],
-  (status) => (status?.visibility === 'private' ? status.account.acct : null),
+  (status, me) =>
+    status?.visibility === 'private' && status.account.id !== me
+      ? status.account.acct
+      : null,
 );
 
 export const ComposeHints = () => {
@@ -95,7 +100,7 @@ export const ComposeHints = () => {
     return null;
   }
 
-  return <div>{messages}</div>;
+  return <div className={classes.calloutWrapper}>{messages}</div>;
 };
 
 const defaultWrapper = (children: React.ReactNode, key: string) => (

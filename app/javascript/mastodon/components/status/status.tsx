@@ -4,10 +4,10 @@ import classNames from 'classnames';
 
 import type { Merge } from 'type-fest';
 
+import type { ExpandedStatusShape } from '@/mastodon/models/status';
 import { selectExpandedStatus } from '@/mastodon/selectors/statuses';
 import { createAppSelector, useAppSelector } from '@/mastodon/store';
 
-import { computeHashtagBarForStatus } from '../hashtag_bar';
 import { Hotkeys } from '../hotkeys';
 import { Poll } from '../poll';
 
@@ -15,15 +15,16 @@ import { StatusActionBar } from './action_bar';
 import { StatusAttachments } from './attachments';
 import { StatusContent } from './content';
 import { StatusHashtagBar } from './hashtag_bar';
-import type { StatusHandlers } from './hooks';
+import { StatusRedesignHeader } from './header';
 import {
   StatusContext,
+  useStatusContext,
   useStatusHandlers,
   useTextForScreenReader,
 } from './hooks';
+import { computeHashtagBarForStatus } from './legacy/hashtag_bar';
 import { StatusMeta } from './meta';
 import { StatusPrepend } from './prepend';
-import { StatusRedesignHeader } from './redesign/header';
 import classes from './styles.module.scss';
 import { TranslateButton } from './translate';
 import type { StatusContainerProps, StatusContextType } from './types';
@@ -76,6 +77,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
   showThread,
   headerContents,
   variant = contextToVariant(contextType),
+  nextId,
 }) => {
   // Select data from store
   const { status, parent } = useAppSelector((state) =>
@@ -96,13 +98,18 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
   );
   const contentWrapperId = useId();
 
+  const isNextReplyingToMe = useAppSelector(
+    (state) => state.statuses.getIn([nextId, 'in_reply_to_id']) === statusId,
+  );
+
   // Handlers
   const {
     isFiltered,
     showDespiteFilter,
     onFilterToggle,
     onTranslate,
-    ...handlers
+    onOpenCallback,
+    onOpenClick,
   } = useStatusHandlers({
     status,
     contextType,
@@ -113,13 +120,9 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
     return null; // loading state
   }
 
-  const actualStatus = parent ?? status;
-
   const hotkeysProps = {
-    handlers: {
-      ...handlers,
-      onTranslate,
-    },
+    status,
+    onOpen,
     muted,
     unfocusable,
     'data-id': id,
@@ -143,20 +146,27 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
     <StatusContext.Provider value={{ id, contextType }}>
       <StatusHotkeys
         {...hotkeysProps}
+        onClick={onOpenClick}
         className={classNames(
           classes.root,
           variant === 'thread' && classes.variantThread,
           variant === 'page' && classes.variantPage,
           isQuotedPost && classes.isQuote,
+          status.visibility === 'direct' && classes.isMessage,
+          variant === 'thread' &&
+            isNextReplyingToMe &&
+            !showThread &&
+            classes.connectNextReply,
         )}
         data-featured={featured ? 'true' : null}
         aria-label={screenReaderText}
         data-nosnippet={status.account.noindex || undefined}
+        data-connect-next={nextId ? isNextReplyingToMe : undefined}
       >
         {!skipPrepend && (
           <StatusPrepend
-            status={actualStatus}
-            isReblog={!!parent}
+            status={status}
+            reblogId={parent?.id}
             showThread={showThread}
           />
         )}
@@ -168,7 +178,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
         <TranslateButton status={status} onTranslate={onTranslate} />
 
         <StatusWarning
-          statusId={actualStatus.id}
+          statusId={status.id}
           dismissedFilter={showDespiteFilter}
           onFilterToggle={onFilterToggle}
           wrapperId={contentWrapperId}
@@ -185,7 +195,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
           <StatusContent
             status={status}
             statusContent={statusContent}
-            onReadMore={handlers.onOpen}
+            onReadMore={onOpenCallback}
             onTranslate={onTranslate}
             collapsible
           >
@@ -211,17 +221,16 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
 
         {(variant === 'page' || (showActions && !isQuotedPost)) && (
           <footer className={classes.footer}>
-            {variant === 'page' && (
-              <StatusMeta status={status} className={classes.meta} />
-            )}
-
             {showActions && !isQuotedPost && (
               <StatusActionBar
                 statusId={status.id}
                 withDismiss={withDismiss}
                 withCounters={withCounters}
+                onlyResponses={variant === 'page'}
               />
             )}
+
+            {variant === 'page' && <StatusMeta status={status} />}
           </footer>
         )}
       </StatusHotkeys>
@@ -230,27 +239,28 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
 };
 
 interface StatusHotkeysProps {
+  children: React.ReactNode;
+  status: ExpandedStatusShape;
+  onOpen?: () => void;
   muted?: boolean;
   unfocusable?: boolean;
-  children: React.ReactNode;
-  handlers: Omit<
-    StatusHandlers,
-    | 'isFiltered'
-    | 'showDespiteFilter'
-    | 'onOpenClick'
-    | 'onHeaderClick'
-    | 'onExpandedToggle'
-    | 'onFilterToggle'
-  >;
 }
 
 const StatusHotkeys = ({
+  children,
+  status,
+  onOpen,
   muted,
   unfocusable,
-  children,
-  handlers,
   ...props
 }: StatusHotkeysProps & React.ComponentPropsWithoutRef<'article'>) => {
+  const { contextType } = useStatusContext();
+  const handlers = useStatusHandlers({
+    status,
+    contextType,
+    onOpen,
+  });
+
   if (muted) {
     return <article {...props}>{children}</article>;
   }
@@ -265,7 +275,7 @@ const StatusHotkeys = ({
         boost: handlers.onBoost,
         quote: handlers.onQuote,
         mention: handlers.onMention,
-        open: handlers.onOpen,
+        open: handlers.onOpenCallback,
         openProfile: handlers.onOpenProfile,
         toggleHidden: handlers.onToggleHidden,
         // TODO: This is handled in a child component, so needs to be fixed.
