@@ -10,7 +10,7 @@
 4. 执行[官方文档](https://docs.joinmastodon.org/admin/install/)剩余步骤，安装相应版本的ruby、Gem包和模块，完成实例初始化。
 5. 获取并安装网站证书
 
-#### 从官方实例迁移而来
+#### 从官方实例迁移而来（高可用）
 1. 登录运行实例的机器，通过fork或添加远程分支等方法，`git fetch`本代码，并检出到相应版本
 2. 假设你完全按照[官方文档](https://docs.joinmastodon.org/admin/install/)安装了官方实例，在`mastodon`用户下执行如下命令拉取ruby最新代码
 ```bash
@@ -19,9 +19,9 @@ git -C "$(rbenv root)"/plugins/ruby-build pull
 3. 升级ruby，以`mastodon`身份在长毛象目录下执行 `RUBY_CONFIGURE_OPTS=--with-jemalloc rbenv install`
 4. 安装依赖包`bundle install`和`yarn install --immutable`
 5. 预编译资产`RAILS_ENV=production bundle exec rails assets:precompile`
-6. 停止长毛象进程，以`root`身份执行`systemctl stop mastodon-*`
-7. 迁移数据库，以`mastodon`身份，回到`/home/mastodon/live`，执行`RAILS_ENV=production bundle exec rails db:migrate`
-8. 成功后，启动长毛象进程`systemctl start mastodon-*`
+7. 预迁移数据库，以`mastodon`身份，在`/home/mastodon/live`，执行`SKIP_POST_DEPLOYMENT_MIGRATIONS=true RAILS_ENV=production bundle exec rails db:migrate`
+8. 以`root`身份重启长毛象进程`systemctl restart mastodon-*`
+9. 第二遍迁移数据库，以`mastodon`身份，回到`/home/mastodon/live`，执行`RAILS_ENV=production bundle exec rails db:migrate`
 
 #### 迁移回官方实例
 操作类似以上描述
